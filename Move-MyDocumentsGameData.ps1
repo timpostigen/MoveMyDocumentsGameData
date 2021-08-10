@@ -17,6 +17,7 @@ Validated for PowerShell Core 7 via WinTerm
 
 [CmdletBinding()]
 Param(
+    $GameDataConfigMap,
     [switch] $Fix,
     [switch] $WhatIf
 )
@@ -31,9 +32,14 @@ function Test-RunAsAdministrator {
 
 if(-not $WhatIf) { Test-RunAsAdministrator }
 
-$myDocuments = [Environment]::GetFolderPath('MyDocuments')
+# can't be defaulted in Param() because $PSScriptRoot doesn't exist at that time
+if(-not $PSBoundParameters.ContainsKey('GameDataConfigMap')) {
+    $GameDataConfigMap = Join-Path $PSScriptRoot 'Move-MyDocumentsGameData.yaml'
+}
 
-$gameDirs = ConvertFrom-Yaml (Get-Content -raw (Join-Path $PSScriptRoot 'Move-MyDocumentsGameData.yaml'))
+$gameDirs = ConvertFrom-Yaml (Get-Content -raw $GameDataConfigMap)
+
+$myDocuments = [Environment]::GetFolderPath('MyDocuments')
 
 $gameDirMappings = @()
 $intermediateDirMappings = @()
